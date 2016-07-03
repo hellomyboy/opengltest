@@ -154,6 +154,7 @@
   <ItemGroup>
     <ClInclude Include="fragment" />
     <ClInclude Include="MePaint.h" />
+    <ClInclude Include="tags" />
     <ClInclude Include="vert" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
