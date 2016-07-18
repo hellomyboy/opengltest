@@ -23,55 +23,93 @@ GLuint fragmentShaderID;
 GLuint programID;
 ShapeGenerator shapeGen;
 
-GLuint numOfIndices;
+GLuint numIndicesOfPlance;
+GLuint numIndicesOfTeaport;
 
 GLuint window_width = 800;
 GLuint window_height = 600;
 
 Camera camera;
 
+GLuint teaportVao;
+GLuint planeVao;
+
 
 void MePaint::sendDataToShader()
 {
-	ShapeData shape = shapeGen.makeTeapot();
-	//ShapeData shape = shapeGen.makeArrow();
-	GLuint verticesID;
-	glGenBuffers(1, &verticesID);
-	glBindBuffer(GL_ARRAY_BUFFER, verticesID);
-	glBufferData(GL_ARRAY_BUFFER, shape.vertexBufferSize(), shape.vertices, GL_STATIC_DRAW);
+	//plane
+	ShapeData plance = shapeGen.makePlane();
+	GLuint planeVerticesID;
+	glGenBuffers(1, &planeVerticesID);
+	glBindBuffer(GL_ARRAY_BUFFER, planeVerticesID);
+	glBufferData(GL_ARRAY_BUFFER, plance.vertexBufferSize(), plance.vertices, GL_STATIC_DRAW);
+
+	GLuint planceIndicesID;
+	glGenBuffers(1, &planceIndicesID);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, planceIndicesID);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, plance.indexBufferSize(), plance.indices, GL_STATIC_DRAW);
+	numIndicesOfPlance = plance.numIndices;
+
+	glGenVertexArrays(1, &planeVao);
+	glBindVertexArray(planeVao);
+	glBindBuffer(GL_ARRAY_BUFFER, planeVerticesID);
 	glEnableVertexAttribArray(0);	//position
 	glEnableVertexAttribArray(1);	//color
 	glEnableVertexAttribArray(2);	//normal
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), 0);
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const void *)(3 * sizeof(GL_FLOAT)));
 	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const void *)(6 * sizeof(GL_FLOAT)));
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, planceIndicesID);
 
-	GLuint indicesID;
-	glGenBuffers(1, &indicesID);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indicesID);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, shape.indexBufferSize(), shape.indices, GL_STATIC_DRAW);
-	numOfIndices = shape.numIndices;
+	//teaport
+	ShapeData teaport = shapeGen.makeTeapot();
+	GLuint teaportVertexID;
+	glGenBuffers(1, &teaportVertexID);
+	glBindBuffer(GL_ARRAY_BUFFER, teaportVertexID);
+	glBufferData(GL_ARRAY_BUFFER, teaport.vertexBufferSize(), teaport.vertices, GL_STATIC_DRAW);
 
-	shape.cleanup();
+	GLuint teaportIndicesID;
+	glGenBuffers(1, &teaportIndicesID);
+	glBindBuffer(GL_ARRAY_BUFFER, teaportIndicesID);
+	glBufferData(GL_ARRAY_BUFFER, teaport.indexBufferSize(), teaport.indices, GL_STATIC_DRAW);
+	numIndicesOfTeaport = teaport.numIndices;
+
+	glGenVertexArrays(1, &teaportVao);
+	glBindVertexArray(teaportVao);
+	glBindBuffer(GL_ARRAY_BUFFER, teaportVertexID);
+	glEnableVertexAttribArray(0);
+	glEnableVertexAttribArray(1);
+	glEnableVertexAttribArray(2);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), 0);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)(3 * sizeof(GL_FLOAT)));
+	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)(6 * sizeof(GL_FLOAT)));
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, teaportIndicesID);
+
+	teaport.cleanup();
+	plance.cleanup();
 }
 
 void doPaint() {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	glm::mat4 viewToProjectionMatrix = glm::perspective<float>(58.0f, ((float)window_width) / window_height, 0.1f, 20.0f);
-	//glm::mat4 worldToViewMatrix = glm::lookAt(glm::vec3(0.0270278826f, 5, -9), glm::vec3(-0.194516003f, 2.64676142f, 3.29750848f), glm::vec3(0.0, 1.0f, 0.0));
 	glm::mat4 worldToProjectionMatrix = viewToProjectionMatrix * camera.getWorldToViewMatrix();
+	GLuint modelToProjectionMatrixUnifromLocation = glGetUniformLocation(programID, "modelToProjectionMatrix");
+	mat4 modelToProjectionMatrix;
 
-	//glm::mat4 translateMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f));
-	////glm::mat4 rotateMatrix = glm::rotate(glm::mat4(1.0f), 10.0f, glm::vec3(1.0f, 1.0f, 0.0f));
-	//glm::mat4 scaleMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(1.0f, 1.0f, 1.0f));
-	//glm::mat4 modelToWorldMatrix = scaleMatrix * rotateMatrix * translateMatrix;
-	
-	//glm::mat4 modelToProjectionMatrix = worldToProjectionMatrix * modelToWorldMatrix;
-	GLuint worldToProjectionMatrixUnifromLocation = glGetUniformLocation(programID, "worldToProjectionMatrix");
-	glUniformMatrix4fv(worldToProjectionMatrixUnifromLocation, 1, GL_FALSE, &worldToProjectionMatrix[0][0]);
+	glBindVertexArray(planeVao);
+	mat4 planeModelToWorldMatrix = glm::mat4(1.0f);
+	modelToProjectionMatrix = worldToProjectionMatrix * planeModelToWorldMatrix;
+	glUniformMatrix4fv(modelToProjectionMatrixUnifromLocation, 1, GL_FALSE, &modelToProjectionMatrix[0][0]);
+	glDrawElements(GL_TRIANGLES, numIndicesOfPlance, GL_UNSIGNED_SHORT, 0);
 
-	glDrawElements(GL_TRIANGLES, numOfIndices, GL_UNSIGNED_SHORT, 0);
+	glBindVertexArray(teaportVao);
+	mat4 teaportTranslateMatrix = glm::translate(glm::mat4(1.0f), vec3(0.0f, 2.0f, -2.0f));
+	mat4 teaportRotateMatrix = glm::rotate(glm::mat4(1.0f), -glm::pi<float>()/2, vec3(1.0f, 0.0f, 0.0f));
+	mat4 teaportModelToWorldMatrix =  teaportTranslateMatrix * teaportRotateMatrix;
+	modelToProjectionMatrix = worldToProjectionMatrix * teaportModelToWorldMatrix;
+	glUniformMatrix4fv(modelToProjectionMatrixUnifromLocation, 1, GL_FALSE, &modelToProjectionMatrix[0][0]);
+	glDrawElements(GL_TRIANGLES, numIndicesOfTeaport, GL_UNSIGNED_SHORT, 0);
 	glutSwapBuffers();
 }
 

@@ -11,9 +11,9 @@ using glm::vec3;
 using namespace std;
 
 
-Camera::Camera():viewDirection(0.0270278826f, -0.309016109f, -0.950670898f),
-position(-0.194516003f, 2.64676142f, 3.29750848f),
-UP(0.0f, 1.0f, 0.0f)
+Camera::Camera():viewDirection(0.0f, -1.0f, -1.0f),
+	position(0.0f, 4.0f, 5.0f),
+	UP(0.0f, 1.0f, 0.0f)
 {}
 
 //鼠标事件处理
@@ -49,11 +49,11 @@ void Camera::moveBack() {
 }
 
 void Camera::moveLeft() {
-	position += MOVE_SPEED * strafeDirection;
+	position += -MOVE_SPEED * strafeDirection;
 }
 
 void Camera::moveRight() {
-	position += -MOVE_SPEED * strafeDirection;
+	position += MOVE_SPEED * strafeDirection;
 }
 
 void Camera::moveUp() {

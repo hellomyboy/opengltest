@@ -1,2 +1,3 @@
 ch01_s0 第一章，绘制从中心到外逐渐模糊的圆
-ch02_s0 第二章，画一个茶壶等集合图形
+ch02_teaport 第二章，画一个茶壶等集合图形
+ch03_teaport_plane  一个平面和茶壶同时存在，使用了vertexArray
