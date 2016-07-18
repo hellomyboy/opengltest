@@ -10,6 +10,8 @@
 #include <fstream>
 #include <sstream>
 #include <string>
+#include "Primitives\ShapeGenerator.h"
+#include "Camera.h"
 
 using namespace std;
 using glm::mat4;
@@ -19,138 +21,89 @@ extern MePaint paint;
 GLuint vertexShaderID;
 GLuint fragmentShaderID;
 GLuint programID;
+ShapeGenerator shapeGen;
 
-GLuint vaoID;
+GLuint numOfIndices;
 
-void sendDataToShader1()
-{
-	GLfloat vertexPosition[] = {
-		-0.8f, -0.8f, 0.0f,
-		0.8f, -0.8f, 0.0f,
-		0.0f, 0.8f, 0.0f
-	};
+GLuint window_width = 800;
+GLuint window_height = 600;
 
-	GLfloat vertexColor[] = {
-		1.0f, 0.0f, 0.0f,
-		0.0f, 1.0f, 0.0f,
-		0.0f, 0.0f, 1.0f
-	};
+Camera camera;
 
-	GLuint vbos[2];
-	glGenBuffers(2, vbos);
-	GLuint vertexPositionID, vertexColorID;
-	vertexPositionID = vbos[0];
-	vertexColorID = vbos[1];
-	glBindBuffer(GL_ARRAY_BUFFER, vertexPositionID);
-	glBufferData(GL_ARRAY_BUFFER, 9 * sizeof(GLfloat), vertexPosition, GL_STATIC_DRAW);
-
-	glBindBuffer(GL_ARRAY_BUFFER, vertexColorID);
-	glBufferData(GL_ARRAY_BUFFER, 9 * sizeof(GLfloat), vertexColor, GL_STATIC_DRAW);
-
-	//set vbo to vao
-	glGenVertexArrays(1, &vaoID);
-	glBindVertexArray(vaoID);
-	glEnableVertexAttribArray(0);
-	glEnableVertexAttribArray(1);
-
-	glBindBuffer(GL_ARRAY_BUFFER, vertexPositionID);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
-	glBindBuffer(GL_ARRAY_BUFFER, vertexColorID);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);
-}
 
 void MePaint::sendDataToShader()
 {
-	GLfloat vertexPosition[] = {
-		-0.5f, 0.5f, 0.0f,
-		-0.5f, -0.5f, 0.0f,
-		0.5f, 0.5f, 0.0f,
-		0.5f, 0.5f, 0.0f,
-		-0.5f, -0.5f, 0.0f,
-		0.5f, -0.5f, 0.0f
-	};
+	ShapeData shape = shapeGen.makeTeapot();
+	//ShapeData shape = shapeGen.makeArrow();
+	GLuint verticesID;
+	glGenBuffers(1, &verticesID);
+	glBindBuffer(GL_ARRAY_BUFFER, verticesID);
+	glBufferData(GL_ARRAY_BUFFER, shape.vertexBufferSize(), shape.vertices, GL_STATIC_DRAW);
+	glEnableVertexAttribArray(0);	//position
+	glEnableVertexAttribArray(1);	//color
+	glEnableVertexAttribArray(2);	//normal
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), 0);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const void *)(3 * sizeof(GL_FLOAT)));
+	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const void *)(6 * sizeof(GL_FLOAT)));
 
-	GLfloat texCoord[] = {
-		0.0f, 0.0f, 0.0f,
-		0.0f, 1.0f, 0.0f,
-		1.0f, 0.0f, 0.0f,
-		1.0f, 0.0f, 0.0f,
-		0.0f, 1.0f, 0.0f,
-		1.0f, 1.0f, 1.0f
-	};
+	GLuint indicesID;
+	glGenBuffers(1, &indicesID);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indicesID);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, shape.indexBufferSize(), shape.indices, GL_STATIC_DRAW);
+	numOfIndices = shape.numIndices;
 
-	GLuint vertexPositionID, texCoordID;
-	glGenBuffers(1, &vertexPositionID);
-	glBindBuffer(GL_ARRAY_BUFFER, vertexPositionID);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertexPosition), vertexPosition, GL_STATIC_DRAW);
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
-
-	glGenBuffers(1, &texCoordID);
-	glBindBuffer(GL_ARRAY_BUFFER, texCoordID);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(texCoord), texCoord, GL_STATIC_DRAW);
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);
-
-
-	GLuint uniformIndex = glGetUniformBlockIndex(programID, "BlobSettings");
-	GLint blockSize;
-	glGetActiveUniformBlockiv(programID, uniformIndex, GL_UNIFORM_BLOCK_DATA_SIZE, &blockSize);
-	GLubyte * blockBuffer = (GLubyte *)malloc(blockSize);
-	const char * names[] = {"InnerColor", "OuterColor", "RadiusInner", "RadiusOuter"};
-	GLuint indices[4];
-	glGetUniformIndices(programID, 4, names, indices);
-	GLint offset[4];
-	glGetActiveUniformsiv(programID, 4, indices, GL_UNIFORM_OFFSET, offset);
-
-	GLfloat innerColor[] = {1.0f, 1.0f, 1.0f, 1.0f};
-	GLfloat outerColor[] = {0.0f, 0.0f, 0.0f, 1.0f};
-	GLfloat innerRadius = 0.15f, outerRadius = 0.45f;
-	memcpy(blockBuffer + offset[0], innerColor, 4 * sizeof(GLfloat));
-	memcpy(blockBuffer + offset[1], outerColor, 4 * sizeof(GLfloat));
-	memcpy(blockBuffer + offset[2], &innerRadius, sizeof(GLfloat));
-	memcpy(blockBuffer + offset[3], &outerRadius, sizeof(GLfloat));
-	
-	GLuint vboID;
-	glGenBuffers(1, &vboID);
-	glBindBuffer(GL_UNIFORM_BUFFER, vboID);
-	glBufferData(GL_UNIFORM_BUFFER, blockSize, blockBuffer, GL_DYNAMIC_DRAW);
-
-	glBindBufferBase(GL_UNIFORM_BUFFER, uniformIndex, vboID);
-
-	free(blockBuffer);
+	shape.cleanup();
 }
 
 void doPaint() {
-	glClear(GL_COLOR_BUFFER_BIT);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	//mat4 rotationMatrix = glm::rotate(mat4(1.0f), 10.0f * glm::pi<float>() /180.0f, vec3(0.0f, 0.0f, 1.0f));
-	//GLuint rotationUniformLocation = glGetUniformLocation(programID, "RotationMatrix");
-	//if (rotationUniformLocation >= 0) {
-	//	glUniformMatrix4fv(rotationUniformLocation, 1, GL_FALSE, &rotationMatrix[0][0]);
-	//}
+	glm::mat4 viewToProjectionMatrix = glm::perspective<float>(58.0f, ((float)window_width) / window_height, 0.1f, 20.0f);
+	//glm::mat4 worldToViewMatrix = glm::lookAt(glm::vec3(0.0270278826f, 5, -9), glm::vec3(-0.194516003f, 2.64676142f, 3.29750848f), glm::vec3(0.0, 1.0f, 0.0));
+	glm::mat4 worldToProjectionMatrix = viewToProjectionMatrix * camera.getWorldToViewMatrix();
 
-	//glBindVertexArray(vaoID);
-	glDrawArrays(GL_TRIANGLES, 0, 6);
+	//glm::mat4 translateMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f));
+	////glm::mat4 rotateMatrix = glm::rotate(glm::mat4(1.0f), 10.0f, glm::vec3(1.0f, 1.0f, 0.0f));
+	//glm::mat4 scaleMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(1.0f, 1.0f, 1.0f));
+	//glm::mat4 modelToWorldMatrix = scaleMatrix * rotateMatrix * translateMatrix;
+	
+	//glm::mat4 modelToProjectionMatrix = worldToProjectionMatrix * modelToWorldMatrix;
+	GLuint worldToProjectionMatrixUnifromLocation = glGetUniformLocation(programID, "worldToProjectionMatrix");
+	glUniformMatrix4fv(worldToProjectionMatrixUnifromLocation, 1, GL_FALSE, &worldToProjectionMatrix[0][0]);
+
+	glDrawElements(GL_TRIANGLES, numOfIndices, GL_UNSIGNED_SHORT, 0);
 	glutSwapBuffers();
+}
 
-
-	/*GLint nUniforms, maxLength;
-	glGetProgramiv(programID, GL_ACTIVE_UNIFORMS, &nUniforms);
-	glGetProgramiv(programID, GL_ACTIVE_UNIFORM_MAX_LENGTH, &maxLength);
-	cout << "number of uniforms:" << nUniforms << ", maximum length of uniform:" << maxLength << endl;;
-
-	GLchar * name = (GLchar *)malloc(maxLength);
-	GLint size, written, location;
-	GLenum type;
-	cout << "location | name" << endl;
-	cout << "-------------------------------" << endl;
-	for (int i = 0; i < nUniforms; i++) {
-		glGetActiveUniform(programID, i, maxLength, &written, &size, &type, name);
-		location = glGetUniformLocation(programID, name);
-		printf(" %-5d | %s, size: %d, type: %d\n", location, name, size, type);
+void keyboardPressFunc(unsigned char key, int x, int y) {
+	cout << "button:"<< key << "," << x << "," << y << endl;
+	switch (key) {
+	case 'w':
+		camera.moveForward();
+		break;
+	case 's':
+		camera.moveBack();
+		break;
+	case 'a':
+		camera.moveLeft();
+		break;
+	case 'd':
+		camera.moveRight();
+		break;
+	case 'r':
+		camera.moveUp();
+		break;
+	case 'f':
+		camera.moveDown();
+		break;
 	}
-	free(name);*/
+	doPaint();
+}
+
+void mouseChangeFunc(int x, int y) {
+	cout << "mouse:"<< x << "," << y << endl;
+	camera.mouseUpdate(glm::vec2(x, y));
+	doPaint();
 }
 
 const string MePaint::loadShaderAsString(const string fileName) {
@@ -173,8 +126,8 @@ void MePaint::createShaderAndProgram()
 	}
 
 	const GLchar* codeArr[1];
-	const string vertexShaderCode = loadShaderAsString("vert");
-	const string fragmentShaderCode = loadShaderAsString("fragment");
+	const string vertexShaderCode = loadShaderAsString("VertexShader");
+	const string fragmentShaderCode = loadShaderAsString("FragmentShader");
 	codeArr[0] = vertexShaderCode.c_str();
 	glShaderSource(vertexShaderID, 1, codeArr, NULL);
 	codeArr[0] = fragmentShaderCode.c_str();
@@ -244,7 +197,7 @@ void MePaint::createShaderAndProgram()
 void MePaint::MainPaint(int argc, char** argv) {
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GL_RGBA | GL_DOUBLE);
-	glutInitWindowSize(600, 600);
+	glutInitWindowSize(window_width, window_height);
 	glutInitWindowPosition(300, 50);
 	glutCreateWindow("my panint");
 
@@ -254,9 +207,12 @@ void MePaint::MainPaint(int argc, char** argv) {
 		return ;
 	}
 
+	glEnable(GL_DEPTH_TEST);
 	createShaderAndProgram();
 	sendDataToShader();
 	glutDisplayFunc(doPaint);
+	glutKeyboardFunc(keyboardPressFunc);
+	glutPassiveMotionFunc(mouseChangeFunc);
 
 	glutMainLoop();
 }

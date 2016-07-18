@@ -13,6 +13,9 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="头文件\Primitives">
+      <UniqueIdentifier>{e08b4772-ee7a-47a0-9443-81b8def806ec}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -21,19 +24,43 @@
     <ClCompile Include="MePaint.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="Main.cpp">
+    <ClCompile Include="Starter.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Primitives\ShapeGenerator.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Camera.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="vert">
-      <Filter>源文件</Filter>
-    </ClInclude>
     <ClInclude Include="MePaint.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="fragment">
+    <ClInclude Include="tags">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Primitives\TeapotData.h">
+      <Filter>头文件\Primitives</Filter>
+    </ClInclude>
+    <ClInclude Include="Primitives\Vertex.h">
+      <Filter>头文件\Primitives</Filter>
+    </ClInclude>
+    <ClInclude Include="FragmentShader">
       <Filter>源文件</Filter>
+    </ClInclude>
+    <ClInclude Include="VertexShader">
+      <Filter>源文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Primitives\ShapeData.h">
+      <Filter>头文件\Primitives</Filter>
+    </ClInclude>
+    <ClInclude Include="Primitives\ShapeGenerator.h">
+      <Filter>头文件\Primitives</Filter>
+    </ClInclude>
+    <ClInclude Include="Camera.h">
+      <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -1,0 +1,11 @@
+#version 400
+
+in vec3 toColor;
+
+out vec3 fragColor;
+
+
+void main()
+{
+	fragColor = toColor;
+}

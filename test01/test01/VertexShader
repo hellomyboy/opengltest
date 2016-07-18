@@ -1,0 +1,14 @@
+#version 400
+
+layout (location=0) in vec4 VertexPosition;
+layout (location=1) in vec3 VertexColor;
+layout (location=2) in vec3 VertexNormal;
+
+uniform mat4 worldToProjectionMatrix;
+out vec3 toColor;
+
+void main()
+{
+	toColor = VertexColor;
+	gl_Position = worldToProjectionMatrix * VertexPosition;
+}
