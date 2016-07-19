@@ -1,11 +1,26 @@
 #version 400
 
-in vec3 toColor;
+in vec3 Position;
+in vec3 Normal;
+
+uniform vec3 lightPosition;
+uniform vec3 eyePosition;
+uniform vec3 ambientLight;
 
 out vec3 fragColor;
 
-
 void main()
 {
-	fragColor = toColor;
+	vec3 s = normalize(lightPosition - Position);
+	vec3 n = normalize(Normal);
+	vec3 r = reflect(-s, n);
+	vec3 v = normalize(eyePosition - Position);
+
+	float diffuse = pow(max(dot(n, s), 0.0), 20);
+	float specular = pow(max(dot(v, r), 0.0), 50);
+
+	vec3 diffuseLight = vec3(diffuse, diffuse, diffuse);
+	vec3 specularLight = vec3(specular, specular, specular);
+
+	fragColor = ambientLight + diffuseLight + specularLight;
 }

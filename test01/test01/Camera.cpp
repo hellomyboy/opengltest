@@ -20,7 +20,7 @@ Camera::Camera():viewDirection(0.0f, -1.0f, -1.0f),
 void Camera::mouseUpdate(const glm::vec2 & newMousePosition) {
 	glm::vec2 delta = newMousePosition - oldMousePosition;
 	if (glm::length(delta) > 50.0f) {
-		cout << "move to large:" << glm::length(delta) << endl;
+		//cout << "move to large:" << glm::length(delta) << endl;
 		oldMousePosition = newMousePosition;
 		return;
 	}
@@ -36,7 +36,7 @@ glm::mat4 Camera::getWorldToViewMatrix() {
 	return glm::lookAt(position, position + viewDirection, UP);
 }
 
-vec3 Camera::getPosition() {
+vec3 & Camera::getPosition() {
 	return position;
 }
 
@@ -57,12 +57,10 @@ void Camera::moveRight() {
 }
 
 void Camera::moveUp() {
-	cout << "up" << endl;
 	position += MOVE_SPEED * UP;
 }
 
 void Camera::moveDown() {
-	cout << "down" << endl;
 	position += -MOVE_SPEED * UP;
 }
 

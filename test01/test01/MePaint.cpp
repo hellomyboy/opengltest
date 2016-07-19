@@ -38,7 +38,7 @@ GLuint planeVao;
 void MePaint::sendDataToShader()
 {
 	//plane
-	ShapeData plance = shapeGen.makePlane();
+	ShapeData plance = shapeGen.makePlane(30);
 	GLuint planeVerticesID;
 	glGenBuffers(1, &planeVerticesID);
 	glBindBuffer(GL_ARRAY_BUFFER, planeVerticesID);
@@ -92,29 +92,42 @@ void MePaint::sendDataToShader()
 void doPaint() {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	glm::mat4 viewToProjectionMatrix = glm::perspective<float>(58.0f, ((float)window_width) / window_height, 0.1f, 20.0f);
+	glm::mat4 viewToProjectionMatrix = glm::perspective<float>(58.0f, ((float)window_width) / window_height, 0.1f, 50.0f);
 	glm::mat4 worldToProjectionMatrix = viewToProjectionMatrix * camera.getWorldToViewMatrix();
 	GLuint modelToProjectionMatrixUnifromLocation = glGetUniformLocation(programID, "modelToProjectionMatrix");
+	GLuint modelToWorldMatrixUniformLocation = glGetUniformLocation(programID, "modelToWorldMatrix");
+	GLuint lightPositionUniformLocation = glGetUniformLocation(programID, "lightPosition");
+	GLuint eyePositionUniformLocation = glGetUniformLocation(programID, "eyePosition");
+	GLuint ambientUniformLocation = glGetUniformLocation(programID, "ambientLight");
+	vec3 lightPosition(0.0, 10.0, 0.0);
+	vec3 ambientLight = vec3(0.3, 0.3, 0.3);
+	//vec3 cameraPosition = camera.getPosition();
+	glUniform3fv(lightPositionUniformLocation, 1, &lightPosition[0]);
+	glUniform3fv(eyePositionUniformLocation, 1, &camera.getPosition()[0]);
+	glUniform3fv(ambientUniformLocation, 1, &ambientLight[0]);
 	mat4 modelToProjectionMatrix;
+	mat4 modelToWorldMatrix;
 
 	glBindVertexArray(planeVao);
-	mat4 planeModelToWorldMatrix = glm::mat4(1.0f);
-	modelToProjectionMatrix = worldToProjectionMatrix * planeModelToWorldMatrix;
+	modelToWorldMatrix = glm::mat4(1.0f);
+	modelToProjectionMatrix = worldToProjectionMatrix * modelToWorldMatrix;
+	glUniformMatrix4fv(modelToWorldMatrixUniformLocation, 1, GL_FALSE, &modelToWorldMatrix[0][0]);
 	glUniformMatrix4fv(modelToProjectionMatrixUnifromLocation, 1, GL_FALSE, &modelToProjectionMatrix[0][0]);
 	glDrawElements(GL_TRIANGLES, numIndicesOfPlance, GL_UNSIGNED_SHORT, 0);
 
 	glBindVertexArray(teaportVao);
-	mat4 teaportTranslateMatrix = glm::translate(glm::mat4(1.0f), vec3(0.0f, 2.0f, -2.0f));
+	mat4 teaportTranslateMatrix = glm::translate(glm::mat4(1.0f), vec3(0.0f, 2.0f, -10.0f));
 	mat4 teaportRotateMatrix = glm::rotate(glm::mat4(1.0f), -glm::pi<float>()/2, vec3(1.0f, 0.0f, 0.0f));
-	mat4 teaportModelToWorldMatrix =  teaportTranslateMatrix * teaportRotateMatrix;
-	modelToProjectionMatrix = worldToProjectionMatrix * teaportModelToWorldMatrix;
+	modelToWorldMatrix =  teaportTranslateMatrix * teaportRotateMatrix;
+	modelToProjectionMatrix = worldToProjectionMatrix * modelToWorldMatrix;
+	glUniformMatrix4fv(modelToWorldMatrixUniformLocation, 1, GL_FALSE, &modelToWorldMatrix[0][0]);
 	glUniformMatrix4fv(modelToProjectionMatrixUnifromLocation, 1, GL_FALSE, &modelToProjectionMatrix[0][0]);
 	glDrawElements(GL_TRIANGLES, numIndicesOfTeaport, GL_UNSIGNED_SHORT, 0);
 	glutSwapBuffers();
 }
 
 void keyboardPressFunc(unsigned char key, int x, int y) {
-	cout << "button:"<< key << "," << x << "," << y << endl;
+	//cout << "button:"<< key << "," << x << "," << y << endl;
 	switch (key) {
 	case 'w':
 		camera.moveForward();
@@ -139,7 +152,7 @@ void keyboardPressFunc(unsigned char key, int x, int y) {
 }
 
 void mouseChangeFunc(int x, int y) {
-	cout << "mouse:"<< x << "," << y << endl;
+	//cout << "mouse:"<< x << "," << y << endl;
 	camera.mouseUpdate(glm::vec2(x, y));
 	doPaint();
 }

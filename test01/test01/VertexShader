@@ -4,12 +4,15 @@ layout (location=0) in vec4 VertexPosition;
 layout (location=1) in vec3 VertexColor;
 layout (location=2) in vec3 VertexNormal;
 
-//uniform mat4 worldToProjectionMatrix;
 uniform mat4 modelToProjectionMatrix;
-out vec3 toColor;
+uniform mat4 modelToWorldMatrix;
+
+out vec3 Position;
+out vec3 Normal;
 
 void main()
 {
-	toColor = vec3(0.3, 0.3, 0.3);
+	Position = vec3(modelToWorldMatrix * VertexPosition);
+	Normal = vec3(modelToWorldMatrix * vec4(VertexNormal, 0.0));
 	gl_Position = modelToProjectionMatrix * VertexPosition;
 }
