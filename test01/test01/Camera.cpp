@@ -11,8 +11,8 @@ using glm::vec3;
 using namespace std;
 
 
-Camera::Camera():viewDirection(0.0f, -1.0f, -1.0f),
-	position(0.0f, 4.0f, 5.0f),
+Camera::Camera():viewDirection(0.09f, -0.11f, -1.4f),
+	position(-3.535f, 4.945f, 10.327f),
 	UP(0.0f, 1.0f, 0.0f)
 {}
 
@@ -62,6 +62,11 @@ void Camera::moveUp() {
 
 void Camera::moveDown() {
 	position += -MOVE_SPEED * UP;
+}
+
+void Camera::showInfo()
+{
+	cout << "position(" << position.x << "," << position.y << "," << position.z << "), view(" << viewDirection.x << "," << viewDirection.y << "," << viewDirection.z <<")"<< endl;
 }
 
 Camera::~Camera() {}

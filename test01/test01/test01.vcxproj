@@ -152,6 +152,7 @@
     <ClCompile Include="Primitives\ShapeGenerator.cpp" />
     <ClCompile Include="Starter.cpp" />
     <ClCompile Include="MePaint.cpp" />
+    <ClCompile Include="UniformBlock.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h" />
@@ -162,6 +163,7 @@
     <ClInclude Include="Primitives\TeapotData.h" />
     <ClInclude Include="Primitives\Vertex.h" />
     <ClInclude Include="tags" />
+    <ClInclude Include="UniformBlock.h" />
     <ClInclude Include="VertexShader" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

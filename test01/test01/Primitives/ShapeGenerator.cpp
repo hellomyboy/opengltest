@@ -332,7 +332,8 @@ ShapeData ShapeGenerator::makePlaneVerts(uint dimensions)
 			thisVert.position.z = i - half;
 			thisVert.position.y = 0;
 			thisVert.normal = glm::vec3(0.0f, 1.0f, 0.0f);
-			thisVert.color = randomColor();
+			//thisVert.color = randomColor();
+			thisVert.color = vec3(0.3, 0.3, 0.3);
 		}
 	}
 	return ret;
@@ -396,7 +397,8 @@ ShapeData ShapeGenerator::makeTeapot(uint tesselation, const glm::mat4& lidTrans
 		v.normal.x = normals[i * 3 + 0];
 		v.normal.y = normals[i * 3 + 1];
 		v.normal.z = normals[i * 3 + 2];
-		v.color = randomColor();
+		//v.color = randomColor();
+		v.color = vec3(0.612, 0.304, 0.084);
 	}
 	return ret;
 }

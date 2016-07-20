@@ -12,6 +12,7 @@
 #include <string>
 #include "Primitives\ShapeGenerator.h"
 #include "Camera.h"
+#include "UniformBlock.h"
 
 using namespace std;
 using glm::mat4;
@@ -34,6 +35,7 @@ Camera camera;
 GLuint teaportVao;
 GLuint planeVao;
 
+#define ARRAY_ELEMENT_NUM(a) (sizeof(a)/sizeof(*a))
 
 void MePaint::sendDataToShader()
 {
@@ -96,18 +98,33 @@ void doPaint() {
 	glm::mat4 worldToProjectionMatrix = viewToProjectionMatrix * camera.getWorldToViewMatrix();
 	GLuint modelToProjectionMatrixUnifromLocation = glGetUniformLocation(programID, "modelToProjectionMatrix");
 	GLuint modelToWorldMatrixUniformLocation = glGetUniformLocation(programID, "modelToWorldMatrix");
-	GLuint lightPositionUniformLocation = glGetUniformLocation(programID, "lightPosition");
-	GLuint eyePositionUniformLocation = glGetUniformLocation(programID, "eyePosition");
-	GLuint ambientUniformLocation = glGetUniformLocation(programID, "ambientLight");
+	glUniform3fv(glGetUniformLocation(programID, "eyePosition"), 1, &camera.getPosition()[0]);
+
+	//light's reflectivity and shininess
+	vec3 Ka = vec3(0.2, 0.2, 0.2), Kd = vec3(0.5, 0.5, 0.5), Ks = vec3(0.4, 0.4, 0.4);
+	float shininess = 50.0f;
+	glUniform3fv(glGetUniformLocation(programID, "Ka"), 1, &Ka[0]);
+	glUniform3fv(glGetUniformLocation(programID, "Kd"), 1, &Kd[0]);
+	glUniform3fv(glGetUniformLocation(programID, "Ks"), 1, &Ks[0]);
+	glUniform1f(glGetUniformLocation(programID, "Shininess"), shininess);
+
+	//light info
 	vec3 lightPosition(0.0, 10.0, 0.0);
-	vec3 ambientLight = vec3(0.3, 0.3, 0.3);
-	//vec3 cameraPosition = camera.getPosition();
-	glUniform3fv(lightPositionUniformLocation, 1, &lightPosition[0]);
-	glUniform3fv(eyePositionUniformLocation, 1, &camera.getPosition()[0]);
-	glUniform3fv(ambientUniformLocation, 1, &ambientLight[0]);
+	vec3 lightIntensity = vec3(1.0, 1.0, 1.0);
+	glUniform3fv(glGetUniformLocation(programID, "Light.position"), 1, &lightPosition[0]);
+	glUniform3fv(glGetUniformLocation(programID, "Light.intensity"), 1, &lightIntensity[0]);
+
+	//fog info
+	GLfloat maxDist = 20.0f, minDist = 0.1f;
+	vec3 fogColor = vec3(0.01, 0.01, 0.01);
+	glUniform1f(glGetUniformLocation(programID, "Fog.minDist"), minDist);
+	glUniform1f(glGetUniformLocation(programID, "Fog.maxDist"), maxDist);
+	glUniform3fv(glGetUniformLocation(programID, "Fog.color"), 1, &fogColor[0]);
+
 	mat4 modelToProjectionMatrix;
 	mat4 modelToWorldMatrix;
-
+	
+	//draw plane
 	glBindVertexArray(planeVao);
 	modelToWorldMatrix = glm::mat4(1.0f);
 	modelToProjectionMatrix = worldToProjectionMatrix * modelToWorldMatrix;
@@ -115,14 +132,18 @@ void doPaint() {
 	glUniformMatrix4fv(modelToProjectionMatrixUnifromLocation, 1, GL_FALSE, &modelToProjectionMatrix[0][0]);
 	glDrawElements(GL_TRIANGLES, numIndicesOfPlance, GL_UNSIGNED_SHORT, 0);
 
-	glBindVertexArray(teaportVao);
-	mat4 teaportTranslateMatrix = glm::translate(glm::mat4(1.0f), vec3(0.0f, 2.0f, -10.0f));
-	mat4 teaportRotateMatrix = glm::rotate(glm::mat4(1.0f), -glm::pi<float>()/2, vec3(1.0f, 0.0f, 0.0f));
-	modelToWorldMatrix =  teaportTranslateMatrix * teaportRotateMatrix;
-	modelToProjectionMatrix = worldToProjectionMatrix * modelToWorldMatrix;
-	glUniformMatrix4fv(modelToWorldMatrixUniformLocation, 1, GL_FALSE, &modelToWorldMatrix[0][0]);
-	glUniformMatrix4fv(modelToProjectionMatrixUnifromLocation, 1, GL_FALSE, &modelToProjectionMatrix[0][0]);
-	glDrawElements(GL_TRIANGLES, numIndicesOfTeaport, GL_UNSIGNED_SHORT, 0);
+	//draw teaport
+	for (int i = 0; i < 4; i++) {
+		glBindVertexArray(teaportVao);
+		mat4 teaportTranslateMatrix = glm::translate(glm::mat4(1.0f), vec3(-8.0f + i * 3.5f, 2.0f, 3.0f - i * 3.0f));
+		mat4 teaportRotateMatrix = glm::rotate(glm::mat4(1.0f), -glm::pi<float>() / 2, vec3(1.0f, 0.0f, 0.0f));
+		modelToWorldMatrix = teaportTranslateMatrix * teaportRotateMatrix;
+		modelToProjectionMatrix = worldToProjectionMatrix * modelToWorldMatrix;
+		glUniformMatrix4fv(modelToWorldMatrixUniformLocation, 1, GL_FALSE, &modelToWorldMatrix[0][0]);
+		glUniformMatrix4fv(modelToProjectionMatrixUnifromLocation, 1, GL_FALSE, &modelToProjectionMatrix[0][0]);
+		glDrawElements(GL_TRIANGLES, numIndicesOfTeaport, GL_UNSIGNED_SHORT, 0);
+	}
+
 	glutSwapBuffers();
 }
 
@@ -148,6 +169,7 @@ void keyboardPressFunc(unsigned char key, int x, int y) {
 		camera.moveDown();
 		break;
 	}
+	camera.showInfo();
 	doPaint();
 }
 
