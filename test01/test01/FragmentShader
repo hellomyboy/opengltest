@@ -7,22 +7,24 @@ uniform vec3 lightPosition;
 uniform vec3 eyePosition;
 uniform vec3 ambientLight;
 
+const float intensity = 0.9;
+
+const int levels = 3;
+const float scaleFactor = 1.0/levels;
+
 out vec3 fragColor;
 
 void main()
 {
 	vec3 s = normalize(lightPosition - Position);
 	vec3 n = normalize(Normal);
-	//vec3 r = reflect(-s, n);
 	vec3 v = normalize(eyePosition - Position);
 	vec3 h = normalize((s + v)/2);
 
-	float diffuse = pow(max(dot(n, s), 0.0), 20);
-	//float specular = pow(max(dot(v, r), 0.0), 50);
-	float specular = pow(max(dot(n, h), 0.0), 100);
+	float diffuse = floor(pow(max(dot(n, s), 0.0), 1) * levels) * scaleFactor;
+	float specular = max(dot(n, h), 0.0);
 
 	vec3 diffuseLight = vec3(diffuse, diffuse, diffuse);
-	vec3 specularLight = vec3(specular, specular, specular);
 
-	fragColor = ambientLight + diffuseLight + specularLight;
+	fragColor = intensity * ambientLight + intensity * (diffuseLight) ;
 }
