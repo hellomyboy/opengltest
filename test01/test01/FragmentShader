@@ -13,11 +13,13 @@ void main()
 {
 	vec3 s = normalize(lightPosition - Position);
 	vec3 n = normalize(Normal);
-	vec3 r = reflect(-s, n);
+	//vec3 r = reflect(-s, n);
 	vec3 v = normalize(eyePosition - Position);
+	vec3 h = normalize((s + v)/2);
 
 	float diffuse = pow(max(dot(n, s), 0.0), 20);
-	float specular = pow(max(dot(v, r), 0.0), 50);
+	//float specular = pow(max(dot(v, r), 0.0), 50);
+	float specular = pow(max(dot(n, h), 0.0), 100);
 
 	vec3 diffuseLight = vec3(diffuse, diffuse, diffuse);
 	vec3 specularLight = vec3(specular, specular, specular);
