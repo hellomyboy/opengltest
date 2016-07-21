@@ -1,1 +1,17 @@
-﻿  test01.vcxproj -> D:\gitrespo\opengltest\test01\Debug\test01.exe
+﻿  UniformBlock.cpp
+  MePaint.cpp
+  Starter.cpp
+  ShapeGenerator.cpp
+d:\gitrespo\opengltest\test01\test01\primitives\shapegenerator.cpp(326): warning C4018: “<”: 有符号/无符号不匹配
+d:\gitrespo\opengltest\test01\test01\primitives\shapegenerator.cpp(328): warning C4018: “<”: 有符号/无符号不匹配
+d:\gitrespo\opengltest\test01\test01\primitives\shapegenerator.cpp(331): warning C4244: “=”: 从“int”转换到“float”，可能丢失数据
+d:\gitrespo\opengltest\test01\test01\primitives\shapegenerator.cpp(332): warning C4244: “=”: 从“int”转换到“float”，可能丢失数据
+d:\gitrespo\opengltest\test01\test01\primitives\shapegenerator.cpp(348): warning C4018: “<”: 有符号/无符号不匹配
+d:\gitrespo\opengltest\test01\test01\primitives\shapegenerator.cpp(350): warning C4018: “<”: 有符号/无符号不匹配
+d:\gitrespo\opengltest\test01\test01\primitives\teapotdata.h(202): warning C4838: 从“double”转换到“float”需要收缩转换
+d:\gitrespo\opengltest\test01\test01\primitives\teapotdata.h(202): warning C4305: “初始化”: 从“double”到“float”截断
+d:\gitrespo\opengltest\test01\test01\primitives\shapegenerator.cpp(624): warning C4018: “<”: 有符号/无符号不匹配
+d:\gitrespo\opengltest\test01\test01\primitives\shapegenerator.cpp(637): warning C4018: “<”: 有符号/无符号不匹配
+  Camera.cpp
+  正在生成代码...
+  test01.vcxproj -> D:\gitrespo\opengltest\test01\Debug\test01.exe
